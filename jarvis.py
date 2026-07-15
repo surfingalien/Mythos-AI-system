@@ -15,8 +15,9 @@ Run:
 """
 
 import datetime
-import os
+import platform
 import queue
+import subprocess
 import threading
 import webbrowser
 
@@ -223,13 +224,10 @@ class JarvisWorker(threading.Thread):
 
         # Open browsers
         if 'open chrome' in q:
-            self._say("Opening Google Chrome.")
-            os.system("start chrome" if os.name == "nt" else "google-chrome"
-                      if os.name == "posix" else "open -a 'Google Chrome'")
+            self._say(_open_browser("chrome"))
             return
         if 'open edge' in q:
-            self._say("Opening Microsoft Edge.")
-            os.system("start msedge" if os.name == "nt" else "open -a 'Microsoft Edge'")
+            self._say(_open_browser("edge"))
             return
 
         # Time
@@ -240,8 +238,8 @@ class JarvisWorker(threading.Thread):
 
         # Weather
         if 'weather' in q:
-            if 'in' in q:
-                city = q.split("in")[-1].strip()
+            if ' in ' in q:
+                city = q.split(" in ")[-1].strip()
             else:
                 city = config.default_city
             self._say(f"Checking the weather in {city}.")
@@ -255,11 +253,12 @@ class JarvisWorker(threading.Thread):
             return
 
         # ----- NEW: System controls (volume) -----
-        if 'mute' in q:
-            self._say(system_control.mute_volume())
-            return
+        # 'unmute' must be checked before 'mute' ("unmute" contains "mute")
         if 'unmute' in q:
             self._say(system_control.unmute_volume())
+            return
+        if 'mute' in q:
+            self._say(system_control.mute_volume())
             return
         if 'volume up' in q or 'increase volume' in q or 'louder' in q:
             self._say(system_control.volume_up(10))
@@ -390,6 +389,35 @@ def _extract_number(text: str) -> int | None:
         if w in text:
             return v
     return None
+
+
+_BROWSER_COMMANDS = {
+    "chrome": ("Google Chrome", {
+        "Windows": ["cmd", "/c", "start", "", "chrome"],
+        "Darwin": ["open", "-a", "Google Chrome"],
+        "Linux": ["google-chrome"],
+    }),
+    "edge": ("Microsoft Edge", {
+        "Windows": ["cmd", "/c", "start", "", "msedge"],
+        "Darwin": ["open", "-a", "Microsoft Edge"],
+        "Linux": ["microsoft-edge"],
+    }),
+}
+
+
+def _open_browser(name: str) -> str:
+    """Launch a browser without blocking the assistant thread."""
+    label, commands = _BROWSER_COMMANDS[name]
+    cmd = commands.get(platform.system())
+    if not cmd:
+        return f"I don't know how to open {label} on this system."
+    try:
+        subprocess.Popen(cmd)
+        return f"Opening {label}."
+    except FileNotFoundError:
+        return f"{label} doesn't seem to be installed, sir."
+    except Exception as e:
+        return f"I couldn't open {label}: {e}"
 
 
 def _normalize_email(spoken: str) -> str:

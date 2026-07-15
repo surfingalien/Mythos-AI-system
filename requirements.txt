@@ -1,0 +1,30 @@
+# Core voice / speech / web
+SpeechRecognition>=3.10.0
+pyttsx3>=2.90
+wikipedia>=1.4.0
+googlesearch-python>=1.2.3
+pywhatkit>=5.4
+pyaudio>=0.2.13
+requests>=2.31.0
+
+# AI / LLM
+openai>=1.0.0
+
+# Config
+python-dotenv>=1.0.0
+
+# --- Optional, platform-specific system controls ---
+# These are imported lazily; the app still runs without them.
+
+# Windows volume control
+pycaw>=20230407 ; platform_system == "Windows"
+comtypes>=1.2.0 ; platform_system == "Windows"
+
+# Windows brightness control
+screen-brightness-control>=0.23.0 ; platform_system == "Windows"
+
+# Linux brightness control requires the system binary `brightnessctl`:
+#   sudo apt install brightnessctl
+# Linux volume control requires `amixer` (alsa-utils):
+#   sudo apt install alsa-utils
+# (No pip packages needed for these — both are CLI tools.)

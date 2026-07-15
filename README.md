@@ -1,97 +1,159 @@
 # Jarvis AI Assistant
 
-A voice-controlled desktop assistant with an always-listening wake word, a dark-themed
-Tkinter GUI, and hands-free access to Wikipedia, Google, YouTube music, weather, news,
-system controls (volume/brightness), email, and an OpenAI fallback for everything else.
+A modern, voice-controlled desktop assistant. Version 2 replaces keyword matching
+with an **LLM tool-calling brain**, adds an **offline wake word**, **neural
+text-to-speech**, **local Whisper speech-to-text**, **streaming replies with
+barge-in**, **long-term memory**, and optional **Spotify / Home Assistant / notes /
+MCP** integrations — while still degrading gracefully: every capability is optional,
+and the assistant runs with whatever you have installed and configured.
+
+## How it works
+
+```
+ wake word ──► listen ──► LLM brain (tool calling, streaming) ──► speak
+ openWakeWord   Whisper     OpenAI + 25+ registered tools          edge-tts
+ (offline)      (local)     conversation memory + facts store      (neural)
+     ▲                                                                │
+     └────────────── barge-in: say the wake word to interrupt ◄──────┘
+```
+
+Instead of `if 'weather' in query`, capabilities are **tools** — plain Python
+functions with JSON schemas (`jarvis/tools/`). The LLM picks the right tool,
+extracts arguments, chains multiple tools, and asks follow-up questions when
+something's missing. "It's way too loud and what's it like outside in Berlin?"
+just works. Without an OpenAI key, an offline keyword router still handles the
+classics (time, weather, music, volume, ...).
+
+Every audio engine auto-selects the best installed option and falls back:
+
+| Layer | Modern (preferred) | Fallback |
+|-------|--------------------|----------|
+| Wake word | openWakeWord — offline, instant, pretrained "hey jarvis" | Google Web Speech keyword loop |
+| Speech-to-text | faster-whisper — local, accurate | Google Web Speech |
+| Text-to-speech | edge-tts — natural neural voices | pyttsx3 |
 
 ## Project layout
 
-| File | Purpose |
+| Path | Purpose |
 |------|---------|
-| `jarvis.py` | Main entry — Tkinter GUI (Start/Stop/Config buttons, live conversation log, colour-coded status dot) + threaded assistant that handles all voice commands |
-| `config.py` | Loads all keys/settings from `.env` (via python-dotenv) and exposes a `Config` singleton with `has_openai`/`has_email`/etc. flags + a contacts dict |
-| `system_control.py` | Cross-platform volume (pycaw / osascript / amixer) and brightness (screen_brightness_control / osascript / brightnessctl) with graceful fallbacks and a `capabilities()` check |
-| `email_sender.py` | SMTP send (port 465 SSL or 587 STARTTLS), contact lookup, helpful errors (e.g. Gmail App Password hint) |
-| `.env.example` | Configuration template — copy to `.env` and fill in your keys |
-| `requirements.txt` | Dependencies, with Windows-only packages behind platform markers |
+| `jarvis/llm.py` | The brain: streaming tool-calling loop, history, sentence splitter |
+| `jarvis/router.py` | Offline fallback router (no API key needed) |
+| `jarvis/tools/` | Tool registry + all capabilities (info, media, system, email, memory, notes, Spotify, Home Assistant) |
+| `jarvis/audio/` | TTS / STT / wake-word engines with auto-fallback |
+| `jarvis/core/pipeline.py` | Async pipeline: wake → listen → stream → speak, with barge-in |
+| `jarvis/ui/gui.py` | Dark-themed Tkinter desktop GUI |
+| `jarvis/ui/web.py` | FastAPI + WebSocket web chat UI |
+| `jarvis/memory.py` | Persistent facts the assistant remembers across sessions |
+| `jarvis/mcp_client.py` | Experimental: plug external MCP servers in as tools |
+| `tests/` | Unit tests (run offline, no audio hardware needed) |
 
 ## Setup
 
-### 1. Install dependencies
-
 ```bash
+# Recommended full desktop install
 pip install -r requirements.txt
+
+# Or pick your pieces via extras
+pip install -e ".[llm,audio,commands]"          # core voice assistant
+pip install -e ".[llm,audio,commands,whisper]"  # + local speech-to-text
+pip install -e ".[web]"                         # + web UI
 ```
 
 Notes:
-- **PyAudio** needs PortAudio. On Windows, `pip install pyaudio` usually just works.
-  On macOS: `brew install portaudio` first. On Debian/Ubuntu:
-  `sudo apt install portaudio19-dev python3-pyaudio`.
-- **Linux system controls** use CLI tools, not pip packages:
-  `sudo apt install alsa-utils brightnessctl`.
+- **PyAudio** needs PortAudio: `brew install portaudio` (macOS) or
+  `sudo apt install portaudio19-dev` (Debian/Ubuntu). Windows usually just works.
+- **Neural TTS playback** needs one of `ffplay` (ffmpeg), `mpv`, or `afplay`.
+- **Linux system controls**: `sudo apt install alsa-utils brightnessctl`.
 
-### 2. Configure your keys
-
-```bash
-cp .env.example .env
-```
-
-Then edit `.env`:
-
-| Variable | Where to get it | Needed for |
-|----------|-----------------|------------|
-| `OPENAI_API_KEY` | platform.openai.com | ChatGPT fallback answers |
-| `WEATHER_API_KEY` | openweathermap.org | Weather reports |
-| `NEWS_API_KEY` | newsapi.org | News briefing |
-| `EMAIL_ADDRESS` / `EMAIL_PASSWORD` | Gmail App Password (myaccount.google.com/apppasswords) | Sending email |
-
-Everything is optional — Jarvis starts fine with missing keys and simply tells you
-which feature isn't configured when you ask for it. Use the **⚙ CONFIG CHECK** button
-in the GUI to see what's active.
-
-### 3. Run
+Then configure:
 
 ```bash
-python jarvis.py
+cp .env.example .env   # then edit — every key is optional
 ```
 
-Click **START**, wait for "Jarvis online", then say **"Jarvis"** followed by a command.
+| Variable | Enables |
+|----------|---------|
+| `OPENAI_API_KEY` | The LLM brain (natural language, tool chaining, memory) |
+| `WEATHER_API_KEY` | Weather (openweathermap.org) |
+| `NEWS_API_KEY` | News briefings (newsapi.org) |
+| `EMAIL_ADDRESS` + `EMAIL_PASSWORD` | Email (Gmail App Password) |
+| `CONTACTS` | Named recipients, e.g. `john:john@example.com,boss:boss@co.com` |
+| `SPOTIFY_CLIENT_ID/SECRET` | Spotify playback (`pip install spotipy`, Premium) |
+| `HASS_URL` + `HASS_TOKEN` | Home Assistant smart-home control |
+| `NOTES_DIR` | "Search my notes for ..." over a folder of .md/.txt files |
 
-## Voice commands
+## Run
 
-| Say... | Jarvis does... |
-|--------|----------------|
-| "Jarvis" | Wake word — answers "Yes sir?" and listens for a command |
-| "... wikipedia" | Reads a two-sentence Wikipedia summary aloud (no browser) |
-| "google search ..." | Searches Google in the background, opens the top result |
-| "play music/song ..." | Plays the song on YouTube via pywhatkit |
-| "open chrome" / "open edge" | Launches the browser (Windows, macOS, Linux) |
-| "what's the time" | Speaks the current time |
-| "weather in \<city\>" | Current temperature + conditions (defaults to `DEFAULT_CITY`) |
-| "news" | Reads the top five headlines |
-| "volume up / down", "set volume to 50", "mute", "unmute" | System volume |
-| "brightness up / down", "set brightness to 80" | Screen brightness |
-| "send email to \<name\>" | Emails a contact (asks for subject and body by voice) |
-| "send email" | Asks for recipient address, subject, and body by voice |
-| "list contacts" | Reads out the contact names from `config.py` |
-| "jarvis quit" / "shut down" / "goodbye" | Shuts the assistant down |
-| anything else | Answered by OpenAI (if configured) |
+```bash
+python -m jarvis            # desktop GUI (default)
+python -m jarvis --headless # voice only, no GUI (Raspberry Pi etc.)
+python -m jarvis --web      # browser chat UI at http://127.0.0.1:8765
+python -m jarvis --text     # type-only REPL — test with zero audio hardware
+```
+
+Say **"hey jarvis"** (openWakeWord) or **"jarvis"** (fallback engine), then speak
+naturally. While Jarvis is talking, say the wake word again to **interrupt it**.
+
+## Example commands
+
+With the LLM brain there's no fixed grammar — these are just illustrations:
+
+- "What's the weather like in Berlin, and should I take a jacket?"
+- "Play Bohemian Rhapsody" / "Skip this track" (Spotify) 
+- "Turn off the living room lights" (Home Assistant)
+- "Send an email to John saying I'll be ten minutes late"
+- "Remember that my parking spot is level 3, row F" → later: "Where did I park?"
+- "Search my notes for the pizza dough recipe"
+- "Set the volume to forty and dim the screen"
+- "What's on Wikipedia about Alan Turing?"
+- "Shut down" / "goodbye" — exits
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+ruff check .    # lint
+pytest -q       # tests (39, all offline — CI runs them on 3.10 & 3.12)
+```
+
+Adding a capability is one function:
+
+```python
+from jarvis.tools.registry import tool
+
+@tool(description="Roll an N-sided die.",
+      parameters={"sides": {"type": "integer", "description": "Number of sides"}})
+def roll_die(sides: int) -> str:
+    import random
+    return f"You rolled a {random.randint(1, sides)}."
+```
+
+Drop it in a module under `jarvis/tools/`, import it from `jarvis/tools/__init__.py`,
+and the LLM can use it immediately.
+
+### MCP servers (experimental)
+
+Create `mcp_servers.json` and `pip install mcp` to give Jarvis tools from any
+[MCP](https://modelcontextprotocol.io) server:
+
+```json
+{
+  "filesystem": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/me/documents"]
+  }
+}
+```
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| `PyAudio` fails to install | Install PortAudio first (see Setup step 1) |
-| Mic never hears the wake word | Check your OS default input device; speak within ~3 seconds of the "Waiting for wake word" log line |
-| "I'm having trouble connecting to my neural network" | `OPENAI_API_KEY` missing/invalid, or no internet |
-| Email says "Authentication failed" | Gmail requires an **App Password**, not your account password |
-| Volume/brightness "not available" | Linux: install `alsa-utils` / `brightnessctl`; Windows: ensure `pycaw` / `screen-brightness-control` installed |
-| No speech output on Linux | `pyttsx3` needs espeak: `sudo apt install espeak libespeak1` |
-
-## Customising
-
-- **Wake word / name / default city**: set `WAKE_WORD`, `ASSISTANT_NAME`,
-  `DEFAULT_CITY` in `.env`.
-- **Contacts**: edit the `contacts` dict in `config.py` (lowercase names → addresses).
-- **News country**: set `NEWS_COUNTRY` (e.g. `in`, `gb`, `us`) in `.env`.
-- **OpenAI model**: set `OPENAI_MODEL` (default `gpt-3.5-turbo`).
+| `PyAudio` fails to install | Install PortAudio first (see Setup) |
+| Robotic voice | Install `edge-tts` and `ffmpeg` (for `ffplay`) — check the engine line logged at startup |
+| Wake word sluggish/unreliable | Install `openwakeword` (offline detection) and say "hey jarvis" |
+| Poor transcription | Install `faster-whisper` (`STT_ENGINE=whisper`, try `WHISPER_MODEL=small`) |
+| "I can handle that better with an OpenAI key" | Set `OPENAI_API_KEY` in `.env` to unlock the LLM brain |
+| Email "Authentication failed" | Gmail needs an **App Password**, not your account password |
+| Volume/brightness unavailable (Linux) | `sudo apt install alsa-utils brightnessctl` |
+| No speech output on Linux | `sudo apt install espeak libespeak1` (pyttsx3 fallback) |

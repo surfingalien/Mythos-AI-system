@@ -12,8 +12,8 @@ If a control isn't available, a friendly error message is returned.
 """
 
 import platform
-import subprocess
 import shutil
+import subprocess
 
 _SYSTEM = platform.system().lower()  # 'windows', 'darwin', 'linux'
 
@@ -86,7 +86,8 @@ def unmute_volume() -> str:
 
 # --- Windows volume (pycaw) ---
 def _windows_volume(delta: int = 0, set_to: int | None = None) -> str:
-    from ctypes import cast, POINTER
+    from ctypes import POINTER, cast
+
     from comtypes import CLSCTX_ALL
     from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
@@ -107,7 +108,8 @@ def _windows_volume(delta: int = 0, set_to: int | None = None) -> str:
 
 
 def _windows_mute(unmute: bool = False) -> str:
-    from ctypes import cast, POINTER
+    from ctypes import POINTER, cast
+
     from comtypes import CLSCTX_ALL
     from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
@@ -199,8 +201,9 @@ def _mac_brightness(delta: int = 0, set_to: int | None = None) -> str:
         # Read current via system_profiler is expensive; approximate by adjusting
         v = None
     if v is not None:
-        subprocess.run(["osascript", "-e",
-                        f"tell application \"System Events\" to set brightness of (every window) to {v}"], check=False)
+        script = ('tell application "System Events" '
+                  f'to set brightness of (every window) to {v}')
+        subprocess.run(["osascript", "-e", script], check=False)
         return f"Brightness set to approximately {set_to} percent."
     # Without a reliable read, just nudge via keyboard. Fall through:
     return "Brightness adjustment on macOS is limited; use the keyboard keys."

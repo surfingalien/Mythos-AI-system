@@ -1,30 +1,43 @@
-# Core voice / speech / web
+# Full desktop install. For a minimal setup use the pyproject extras instead:
+#   pip install -e ".[llm,audio,commands]"
+
+# Core
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# LLM brain
+openai>=1.30.0
+
+# Voice: mic capture, wake word, neural TTS
 SpeechRecognition>=3.10.0
+pyaudio>=0.2.13
 pyttsx3>=2.90
+edge-tts>=6.1.0
+openwakeword>=0.6.0
+numpy>=1.24
+
+# Classic commands
 wikipedia>=1.4.0
 googlesearch-python>=1.2.3
 pywhatkit>=5.4
-pyaudio>=0.2.13
-requests>=2.31.0
 
-# AI / LLM
-openai>=1.0.0
+# --- Optional upgrades (uncomment what you want) ---
+# Local, accurate speech-to-text:
+# faster-whisper>=1.0.0
+# Web UI:
+# fastapi>=0.110
+# uvicorn>=0.29
+# websockets>=12.0
+# Spotify playback control:
+# spotipy>=2.23
+# MCP server integration (experimental):
+# mcp>=1.0.0
 
-# Config
-python-dotenv>=1.0.0
-
-# --- Optional, platform-specific system controls ---
-# These are imported lazily; the app still runs without them.
-
-# Windows volume control
+# --- Windows-only system controls ---
 pycaw>=20230407 ; platform_system == "Windows"
 comtypes>=1.2.0 ; platform_system == "Windows"
-
-# Windows brightness control
 screen-brightness-control>=0.23.0 ; platform_system == "Windows"
 
-# Linux brightness control requires the system binary `brightnessctl`:
-#   sudo apt install brightnessctl
-# Linux volume control requires `amixer` (alsa-utils):
-#   sudo apt install alsa-utils
-# (No pip packages needed for these — both are CLI tools.)
+# Linux system controls are CLI tools, not pip packages:
+#   sudo apt install alsa-utils brightnessctl
+# Neural TTS playback needs any of: ffplay (ffmpeg), mpv, afplay (macOS).

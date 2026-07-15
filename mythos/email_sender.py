@@ -12,7 +12,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from jarvis.config import config
+from mythos.config import config
 
 
 def send_email(to_address: str, subject: str, body: str) -> str:

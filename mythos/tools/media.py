@@ -5,7 +5,7 @@ from __future__ import annotations
 import platform
 import subprocess
 
-from jarvis.tools.registry import tool
+from mythos.tools.registry import tool
 
 _BROWSER_COMMANDS: dict[str, tuple[str, dict[str, list[str]]]] = {
     "chrome": ("Google Chrome", {

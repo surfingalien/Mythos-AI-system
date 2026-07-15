@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import threading
 
-from jarvis.config import Config
+from mythos.config import Config
 
 _FRAME_SAMPLES = 1280  # 80 ms at 16 kHz, openWakeWord's expected chunk
 
@@ -24,10 +24,20 @@ class WakeWordDetector:
     def _pick_engine(self) -> str:
         want = self.config.wake_engine
         if want in ("auto", "openwakeword"):
+            # openWakeWord only ships a pretrained model for "hey jarvis";
+            # other wake words need a custom model via WAKE_MODEL_PATH.
+            has_model = (self.config.wake_word in ("jarvis", "hey jarvis")
+                         or bool(self.config.wake_model_path))
             try:
                 import openwakeword  # noqa: F401
                 import pyaudio  # noqa: F401
-                return "openwakeword"
+                if has_model:
+                    return "openwakeword"
+                if want == "openwakeword":
+                    print(f"[Wake] No pretrained openWakeWord model for "
+                          f"'{self.config.wake_word}'. Set WAKE_MODEL_PATH to a "
+                          "custom model, or the speech-recognition fallback "
+                          "will be used.")
             except ImportError:
                 if want == "openwakeword":
                     print("[Wake] openwakeword/pyaudio not installed; "
@@ -56,8 +66,10 @@ class WakeWordDetector:
         from openwakeword.model import Model
 
         if self._oww_model is None:
-            # "hey_jarvis" is one of openWakeWord's bundled pretrained models.
-            self._oww_model = Model(wakeword_models=["hey_jarvis"])
+            # A custom model path wins; otherwise use the bundled
+            # "hey_jarvis" pretrained model.
+            model_name = self.config.wake_model_path or "hey_jarvis"
+            self._oww_model = Model(wakeword_models=[model_name])
         model = self._oww_model
         model.reset()
 

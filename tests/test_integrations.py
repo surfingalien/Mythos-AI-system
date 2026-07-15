@@ -1,7 +1,7 @@
 """Tests for Home Assistant and email tools with network/SMTP mocked out."""
 
-from jarvis.config import config
-from jarvis.tools import comms, home_assistant
+from mythos.config import config
+from mythos.tools import comms, home_assistant
 
 
 class _FakeResponse:

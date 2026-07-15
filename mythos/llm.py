@@ -13,9 +13,9 @@ import json
 import re
 from collections.abc import AsyncIterator
 
-from jarvis import router, tools
-from jarvis.config import Config
-from jarvis.tools.memory_tools import get_memory
+from mythos import router, tools
+from mythos.config import Config
+from mythos.tools.memory_tools import get_memory
 
 # Split after sentence-ending punctuation (optionally followed by a closing
 # quote/bracket), consuming only the whitespace so the punctuation is kept.

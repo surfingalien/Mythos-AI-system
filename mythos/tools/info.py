@@ -6,8 +6,8 @@ import datetime
 
 import requests
 
-from jarvis.config import config
-from jarvis.tools.registry import tool
+from mythos.config import config
+from mythos.tools.registry import tool
 
 
 @tool(description="Get the current local time and date.")

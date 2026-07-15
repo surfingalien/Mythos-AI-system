@@ -9,7 +9,7 @@ Configure servers in mcp_servers.json (path via MCP_CONFIG):
       }
     }
 
-Each server's tools are registered into the Jarvis tool registry as
+Each server's tools are registered into the Mythos tool registry as
 "<server>__<tool>", so the LLM can call them like any built-in capability.
 Requires the official `mcp` Python package.
 """
@@ -21,7 +21,7 @@ import json
 from contextlib import AsyncExitStack
 from pathlib import Path
 
-from jarvis.tools import registry
+from mythos.tools import registry
 
 _stack: AsyncExitStack | None = None
 _loop: asyncio.AbstractEventLoop | None = None

@@ -12,12 +12,12 @@ import threading
 import tkinter as tk
 from tkinter import messagebox, scrolledtext
 
-from jarvis import system_control
-from jarvis.config import config
-from jarvis.core.pipeline import Pipeline
+from mythos import system_control
+from mythos.config import config
+from mythos.core.pipeline import Pipeline
 
 
-class JarvisGUI:
+class MythosGUI:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.msg_queue: queue.Queue = queue.Queue()
@@ -69,7 +69,7 @@ class JarvisGUI:
             state="disabled"
         )
         self.log.pack(fill="both", expand=True)
-        self.log.tag_config("jarvis", foreground=self.accent,
+        self.log.tag_config("assistant", foreground=self.accent,
                             font=("Consolas", 11, "bold"))
         self.log.tag_config("user", foreground="#7ab8ff",
                             font=("Consolas", 11, "bold"))
@@ -137,7 +137,7 @@ class JarvisGUI:
         self.log.config(state="normal")
         who_lower = who.lower()
         if config.assistant_name.lower() in who_lower:
-            tag = "jarvis"
+            tag = "assistant"
             prefix = f"{config.assistant_name}: "
         elif "user" in who_lower:
             tag = "user"
@@ -215,5 +215,5 @@ class JarvisGUI:
 
 def main() -> None:
     root = tk.Tk()
-    JarvisGUI(root)
+    MythosGUI(root)
     root.mainloop()

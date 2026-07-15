@@ -7,7 +7,7 @@ capture uses speech_recognition's energy-based endpointing in both cases.
 
 from __future__ import annotations
 
-from jarvis.config import Config
+from mythos.config import Config
 
 
 class STT:

@@ -1,16 +1,16 @@
-"""Web UI: FastAPI + WebSocket chat interface to the Jarvis brain.
+"""Web UI: FastAPI + WebSocket chat interface to the Mythos brain.
 
 Text in, text out (v1) — perfect for phones on your LAN and for testing the
 brain without any audio hardware. Requires the [web] extra:
     pip install fastapi uvicorn
 Run with:
-    python -m jarvis --web
+    python -m mythos --web
 """
 
 from __future__ import annotations
 
-from jarvis.config import config
-from jarvis.llm import Brain
+from mythos.config import config
+from mythos.llm import Brain
 
 _PAGE = """<!doctype html>
 <html><head><meta charset="utf-8">

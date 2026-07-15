@@ -1,4 +1,4 @@
-"""Centralized configuration for Jarvis.
+"""Centralized configuration for Mythos.
 
 Loads settings from a local `.env` file (via python-dotenv, when installed)
 and exposes them through a single `Config` object. Falls back to safe
@@ -58,9 +58,9 @@ class Config:
         default_factory=lambda: int(_get("EMAIL_SMTP_PORT", "465") or 465))
 
     # --- Assistant behavior ---
-    assistant_name: str = field(default_factory=lambda: _get("ASSISTANT_NAME", "Jarvis"))
+    assistant_name: str = field(default_factory=lambda: _get("ASSISTANT_NAME", "Mythos"))
     default_city: str = field(default_factory=lambda: _get("DEFAULT_CITY", "New York"))
-    wake_word: str = field(default_factory=lambda: _get("WAKE_WORD", "jarvis").lower())
+    wake_word: str = field(default_factory=lambda: _get("WAKE_WORD", "mythos").lower())
 
     # --- Audio engines ---
     # tts: auto | edge | pyttsx3     stt: auto | whisper | google
@@ -72,6 +72,10 @@ class Config:
     wake_engine: str = field(default_factory=lambda: _get("WAKE_ENGINE", "auto").lower())
     wake_threshold: float = field(
         default_factory=lambda: float(_get("WAKE_THRESHOLD", "0.5") or 0.5))
+    # Path to a custom openWakeWord model (.onnx/.tflite). openWakeWord only
+    # ships a pretrained model for "hey jarvis"; any other wake word needs a
+    # custom model here, otherwise the speech-recognition fallback is used.
+    wake_model_path: str = field(default_factory=lambda: _get("WAKE_MODEL_PATH"))
 
     # --- Spotify (optional) ---
     spotify_client_id: str = field(default_factory=lambda: _get("SPOTIFY_CLIENT_ID"))
@@ -85,7 +89,7 @@ class Config:
 
     # --- Personal notes / memory ---
     notes_dir: str = field(default_factory=lambda: _get("NOTES_DIR"))
-    memory_path: str = field(default_factory=lambda: _get("MEMORY_PATH", "jarvis_memory.json"))
+    memory_path: str = field(default_factory=lambda: _get("MEMORY_PATH", "mythos_memory.json"))
 
     # --- Web UI ---
     web_host: str = field(default_factory=lambda: _get("WEB_HOST", "127.0.0.1"))

@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "jarvis-ai-system"
+name = "mythos-ai-system"
 version = "2.0.0"
 description = "Voice assistant with an LLM tool-calling brain, wake word, and modern TTS/STT"
 readme = "README.md"
@@ -45,14 +45,14 @@ windows = [
 ]
 dev = ["pytest>=8.0", "ruff>=0.4"]
 all = [
-    "jarvis-ai-system[llm,audio,whisper,commands,web,spotify,windows]",
+    "mythos-ai-system[llm,audio,whisper,commands,web,spotify,windows]",
 ]
 
 [project.scripts]
-jarvis = "jarvis.__main__:main"
+mythos = "mythos.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["jarvis*"]
+include = ["mythos*"]
 
 [tool.ruff]
 line-length = 100

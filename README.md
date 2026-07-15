@@ -1,4 +1,4 @@
-# Jarvis AI Assistant
+# Mythos AI Assistant
 
 A modern, voice-controlled desktop assistant. Version 2 replaces keyword matching
 with an **LLM tool-calling brain**, adds an **offline wake word**, **neural
@@ -18,7 +18,7 @@ and the assistant runs with whatever you have installed and configured.
 ```
 
 Instead of `if 'weather' in query`, capabilities are **tools** — plain Python
-functions with JSON schemas (`jarvis/tools/`). The LLM picks the right tool,
+functions with JSON schemas (`mythos/tools/`). The LLM picks the right tool,
 extracts arguments, chains multiple tools, and asks follow-up questions when
 something's missing. "It's way too loud and what's it like outside in Berlin?"
 just works. Without an OpenAI key, an offline keyword router still handles the
@@ -28,23 +28,29 @@ Every audio engine auto-selects the best installed option and falls back:
 
 | Layer | Modern (preferred) | Fallback |
 |-------|--------------------|----------|
-| Wake word | openWakeWord — offline, instant, pretrained "hey jarvis" | Google Web Speech keyword loop |
+| Wake word | openWakeWord — offline, instant | Google Web Speech keyword loop |
 | Speech-to-text | faster-whisper — local, accurate | Google Web Speech |
 | Text-to-speech | edge-tts — natural neural voices | pyttsx3 |
+
+> **Wake-word note:** openWakeWord ships a pretrained model only for
+> "hey jarvis". The default wake word is `mythos`, which uses the
+> speech-recognition fallback out of the box. For instant offline detection
+> either set `WAKE_WORD=jarvis`, or train a custom openWakeWord model for
+> "mythos" and point `WAKE_MODEL_PATH` at it.
 
 ## Project layout
 
 | Path | Purpose |
 |------|---------|
-| `jarvis/llm.py` | The brain: streaming tool-calling loop, history, sentence splitter |
-| `jarvis/router.py` | Offline fallback router (no API key needed) |
-| `jarvis/tools/` | Tool registry + all capabilities (info, media, system, email, memory, notes, Spotify, Home Assistant) |
-| `jarvis/audio/` | TTS / STT / wake-word engines with auto-fallback |
-| `jarvis/core/pipeline.py` | Async pipeline: wake → listen → stream → speak, with barge-in |
-| `jarvis/ui/gui.py` | Dark-themed Tkinter desktop GUI |
-| `jarvis/ui/web.py` | FastAPI + WebSocket web chat UI |
-| `jarvis/memory.py` | Persistent facts the assistant remembers across sessions |
-| `jarvis/mcp_client.py` | Experimental: plug external MCP servers in as tools |
+| `mythos/llm.py` | The brain: streaming tool-calling loop, history, sentence splitter |
+| `mythos/router.py` | Offline fallback router (no API key needed) |
+| `mythos/tools/` | Tool registry + all capabilities (info, media, system, email, memory, notes, Spotify, Home Assistant) |
+| `mythos/audio/` | TTS / STT / wake-word engines with auto-fallback |
+| `mythos/core/pipeline.py` | Async pipeline: wake → listen → stream → speak, with barge-in |
+| `mythos/ui/gui.py` | Dark-themed Tkinter desktop GUI |
+| `mythos/ui/web.py` | FastAPI + WebSocket web chat UI |
+| `mythos/memory.py` | Persistent facts the assistant remembers across sessions |
+| `mythos/mcp_client.py` | Experimental: plug external MCP servers in as tools |
 | `tests/` | Unit tests (run offline, no audio hardware needed) |
 
 ## Setup
@@ -81,18 +87,19 @@ cp .env.example .env   # then edit — every key is optional
 | `SPOTIFY_CLIENT_ID/SECRET` | Spotify playback (`pip install spotipy`, Premium) |
 | `HASS_URL` + `HASS_TOKEN` | Home Assistant smart-home control |
 | `NOTES_DIR` | "Search my notes for ..." over a folder of .md/.txt files |
+| `ASSISTANT_NAME` / `WAKE_WORD` | Rename the assistant / change the trigger word |
 
 ## Run
 
 ```bash
-python -m jarvis            # desktop GUI (default)
-python -m jarvis --headless # voice only, no GUI (Raspberry Pi etc.)
-python -m jarvis --web      # browser chat UI at http://127.0.0.1:8765
-python -m jarvis --text     # type-only REPL — test with zero audio hardware
+python -m mythos            # desktop GUI (default)
+python -m mythos --headless # voice only, no GUI (Raspberry Pi etc.)
+python -m mythos --web      # browser chat UI at http://127.0.0.1:8765
+python -m mythos --text     # type-only REPL — test with zero audio hardware
 ```
 
-Say **"hey jarvis"** (openWakeWord) or **"jarvis"** (fallback engine), then speak
-naturally. While Jarvis is talking, say the wake word again to **interrupt it**.
+Say **"mythos"**, then speak naturally. While Mythos is talking, say the wake
+word again to **interrupt it**.
 
 ## Example commands
 
@@ -119,7 +126,7 @@ pytest -q       # tests (39, all offline — CI runs them on 3.10 & 3.12)
 Adding a capability is one function:
 
 ```python
-from jarvis.tools.registry import tool
+from mythos.tools.registry import tool
 
 @tool(description="Roll an N-sided die.",
       parameters={"sides": {"type": "integer", "description": "Number of sides"}})
@@ -128,12 +135,12 @@ def roll_die(sides: int) -> str:
     return f"You rolled a {random.randint(1, sides)}."
 ```
 
-Drop it in a module under `jarvis/tools/`, import it from `jarvis/tools/__init__.py`,
+Drop it in a module under `mythos/tools/`, import it from `mythos/tools/__init__.py`,
 and the LLM can use it immediately.
 
 ### MCP servers (experimental)
 
-Create `mcp_servers.json` and `pip install mcp` to give Jarvis tools from any
+Create `mcp_servers.json` and `pip install mcp` to give Mythos tools from any
 [MCP](https://modelcontextprotocol.io) server:
 
 ```json
@@ -151,7 +158,7 @@ Create `mcp_servers.json` and `pip install mcp` to give Jarvis tools from any
 |---------|-----|
 | `PyAudio` fails to install | Install PortAudio first (see Setup) |
 | Robotic voice | Install `edge-tts` and `ffmpeg` (for `ffplay`) — check the engine line logged at startup |
-| Wake word sluggish/unreliable | Install `openwakeword` (offline detection) and say "hey jarvis" |
+| Wake word sluggish/unreliable | The default "mythos" wake word uses the online fallback; set `WAKE_WORD=jarvis` for offline openWakeWord, or supply `WAKE_MODEL_PATH` |
 | Poor transcription | Install `faster-whisper` (`STT_ENGINE=whisper`, try `WHISPER_MODEL=small`) |
 | "I can handle that better with an OpenAI key" | Set `OPENAI_API_KEY` in `.env` to unlock the LLM brain |
 | Email "Authentication failed" | Gmail needs an **App Password**, not your account password |

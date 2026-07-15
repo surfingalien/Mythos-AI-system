@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from jarvis.config import config
+from mythos.config import config
 
 _WORD_NUMBERS = {
     "zero": 0, "ten": 10, "twenty": 20, "thirty": 30, "forty": 40,

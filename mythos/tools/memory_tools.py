@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from jarvis.config import config
-from jarvis.memory import Memory
-from jarvis.tools.registry import tool
+from mythos.config import config
+from mythos.memory import Memory
+from mythos.tools.registry import tool
 
 _memory: Memory | None = None
 

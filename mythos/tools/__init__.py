@@ -1,7 +1,7 @@
 """Tool package: import all built-in tool modules so they self-register."""
 
 # Importing these modules registers their tools as a side effect.
-from jarvis.tools import (  # noqa: E402,F401
+from mythos.tools import (  # noqa: E402,F401
     comms,
     home_assistant,
     info,
@@ -12,6 +12,6 @@ from jarvis.tools import (  # noqa: E402,F401
     spotify,
     system,
 )
-from jarvis.tools.registry import Tool, dispatch, schemas, tool
+from mythos.tools.registry import Tool, dispatch, schemas, tool
 
 __all__ = ["Tool", "dispatch", "registry", "schemas", "tool"]

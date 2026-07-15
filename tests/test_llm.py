@@ -2,8 +2,8 @@
 
 import asyncio
 
-from jarvis.config import config
-from jarvis.llm import Brain, split_sentences
+from mythos.config import config
+from mythos.llm import Brain, split_sentences
 
 
 def test_split_waits_for_sentence_end():

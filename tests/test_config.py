@@ -1,6 +1,6 @@
 """Tests for configuration parsing."""
 
-from jarvis.config import _parse_contacts, _placeholder
+from mythos.config import _parse_contacts, _placeholder
 
 
 def test_parse_contacts():

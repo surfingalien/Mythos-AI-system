@@ -1,17 +1,17 @@
-"""Entry point: python -m jarvis [--gui | --headless | --web | --text]."""
+"""Entry point: python -m mythos [--gui | --headless | --web | --text]."""
 
 from __future__ import annotations
 
 import argparse
 import asyncio
 
-from jarvis import __version__
-from jarvis.config import config
+from mythos import __version__
+from mythos.config import config
 
 
 def _run_text_repl() -> None:
     """Type-only REPL — test the brain with no audio hardware at all."""
-    from jarvis.llm import Brain
+    from mythos.llm import Brain
 
     brain = Brain(config)
     print(f"{config.assistant_name} text console (v{__version__}). "
@@ -38,7 +38,7 @@ def _run_text_repl() -> None:
 
 def _run_headless() -> None:
     """Voice pipeline without any GUI (e.g. on a Raspberry Pi)."""
-    from jarvis.core.pipeline import Pipeline
+    from mythos.core.pipeline import Pipeline
 
     pipeline = Pipeline(config)
     try:
@@ -49,7 +49,7 @@ def _run_headless() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        prog="jarvis", description="Jarvis AI voice assistant")
+        prog="mythos", description="Mythos AI voice assistant")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--gui", action="store_true",
                       help="desktop GUI (default)")
@@ -68,11 +68,11 @@ def main() -> None:
     elif args.headless:
         _run_headless()
     elif args.web:
-        from jarvis.ui.web import main as web_main
+        from mythos.ui.web import main as web_main
 
         web_main()
     else:
-        from jarvis.ui.gui import main as gui_main
+        from mythos.ui.gui import main as gui_main
 
         gui_main()
 

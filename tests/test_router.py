@@ -1,7 +1,7 @@
 """Tests for the offline fallback router — including the historical bugs."""
 
-from jarvis.config import config
-from jarvis.router import extract_number, normalize_email, route
+from mythos.config import config
+from mythos.router import extract_number, normalize_email, route
 
 
 def test_unmute_not_swallowed_by_mute():

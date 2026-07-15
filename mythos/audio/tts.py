@@ -14,7 +14,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from jarvis.config import Config
+from mythos.config import Config
 
 
 def _find_player() -> list[str] | None:

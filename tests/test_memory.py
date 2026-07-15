@@ -1,6 +1,6 @@
 """Tests for persistent memory."""
 
-from jarvis.memory import Memory
+from mythos.memory import Memory
 
 
 def test_remember_and_reload(tmp_path):

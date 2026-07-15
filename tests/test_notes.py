@@ -1,6 +1,6 @@
 """Tests for the notes keyword-retrieval tool."""
 
-from jarvis.tools.notes import search_notes_dir
+from mythos.tools.notes import search_notes_dir
 
 
 def test_finds_relevant_note(tmp_path):

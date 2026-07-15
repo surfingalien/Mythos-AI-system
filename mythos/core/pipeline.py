@@ -1,7 +1,7 @@
 """The async assistant pipeline.
 
 Flow: wake word -> listen -> LLM (streaming) -> speak, with barge-in:
-saying the wake word while Jarvis is talking interrupts the reply and
+saying the wake word while Mythos is talking interrupts the reply and
 starts listening again immediately.
 
 Blocking audio calls (mic capture, wake detection) run in worker threads;
@@ -15,11 +15,11 @@ import asyncio
 import threading
 from collections.abc import Callable
 
-from jarvis.audio.stt import STT
-from jarvis.audio.tts import TTS
-from jarvis.audio.wake import WakeWordDetector
-from jarvis.config import Config
-from jarvis.llm import Brain
+from mythos.audio.stt import STT
+from mythos.audio.tts import TTS
+from mythos.audio.wake import WakeWordDetector
+from mythos.config import Config
+from mythos.llm import Brain
 
 LogFn = Callable[[str, str], None]
 StatusFn = Callable[[str], None]
@@ -136,7 +136,7 @@ class Pipeline:
         if not Path(self.config.mcp_config_path).exists():
             return
         try:
-            from jarvis.mcp_client import connect_all
+            from mythos.mcp_client import connect_all
 
             count = await connect_all(self.config.mcp_config_path)
             if count:

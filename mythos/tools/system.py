@@ -1,9 +1,9 @@
-"""System tools: volume and brightness, wrapping jarvis.system_control."""
+"""System tools: volume and brightness, wrapping mythos.system_control."""
 
 from __future__ import annotations
 
-from jarvis import system_control
-from jarvis.tools.registry import tool
+from mythos import system_control
+from mythos.tools.registry import tool
 
 _LEVEL_PARAM = {"level": {"type": "integer", "description": "Percentage 0-100"}}
 _STEP_PARAM = {"step": {"type": "integer", "description": "Percent step, default 10"}}

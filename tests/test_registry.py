@@ -1,7 +1,7 @@
 """Tests for the tool registry: schemas, dispatch, enable gating."""
 
-from jarvis.tools import registry
-from jarvis.tools.registry import dispatch, tool
+from mythos.tools import registry
+from mythos.tools.registry import dispatch, tool
 
 
 def test_schema_shape():

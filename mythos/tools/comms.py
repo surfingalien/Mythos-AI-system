@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from jarvis import email_sender
-from jarvis.config import config
-from jarvis.tools.registry import tool
+from mythos import email_sender
+from mythos.config import config
+from mythos.tools.registry import tool
 
 
 @tool(

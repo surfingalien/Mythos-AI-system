@@ -11,6 +11,8 @@ All functions return a human-readable status string suitable for speak().
 If a control isn't available, a friendly error message is returned.
 """
 
+from __future__ import annotations
+
 import platform
 import shutil
 import subprocess

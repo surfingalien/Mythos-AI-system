@@ -55,6 +55,43 @@ Every audio engine auto-selects the best installed option and falls back:
 
 ## Setup
 
+### Quick setup (macOS)
+
+```bash
+git clone https://github.com/surfingalien/Mythos-AI-system.git
+cd Mythos-AI-system
+bash scripts/setup_mac.sh
+```
+
+This installs the system dependencies (`portaudio`, `python-tk`, `ffmpeg` via
+Homebrew), builds a fresh virtualenv **inside the repo** (never in `$HOME` —
+see the note below), and installs all Python dependencies into it using
+explicit paths, so it isn't affected by whatever `python`/`pip` happen to
+resolve to in your shell. Then run it with the matching helper script —
+these also use explicit paths, so they always run the right interpreter:
+
+```bash
+bash scripts/run_text.sh   # type-only REPL, no mic needed — try this first
+bash scripts/run_gui.sh    # desktop GUI with mic + wake word
+bash scripts/run_web.sh    # browser chat UI (kills any stale process on the port first)
+```
+
+If anything seems off — wrong Python version, missing packages, port
+conflicts — run the diagnostic script before troubleshooting manually:
+
+```bash
+bash scripts/doctor.sh
+```
+
+It prints exactly which interpreter and virtualenv are active and flags the
+most common trap: a **same-named `.venv` in a different location** (e.g. your
+home directory) silently shadowing the repo's own venv. Both show an
+identical `(.venv)` prompt prefix, so this is easy to miss — `doctor.sh`
+compares `$VIRTUAL_ENV` against the repo's actual `.venv` path and warns
+if they don't match.
+
+### Manual setup (any OS)
+
 ```bash
 # Recommended full desktop install
 pip install -r requirements.txt

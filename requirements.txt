@@ -27,7 +27,7 @@ pywhatkit>=5.4
 # Web UI:
 # fastapi>=0.110
 # uvicorn>=0.29
-# websockets>=12.0
+# wsproto>=1.2.0
 # Spotify playback control:
 # spotipy>=2.23
 # MCP server integration (experimental):

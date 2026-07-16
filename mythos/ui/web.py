@@ -109,4 +109,9 @@ def create_app():
 def main() -> None:
     import uvicorn
 
-    uvicorn.run(create_app(), host=config.web_host, port=config.web_port)
+    # Force the wsproto WebSocket backend. uvicorn's default backend (the
+    # `websockets` package) has repeatedly broken browser handshakes across
+    # websockets/uvicorn version combinations (connections get a bare 403
+    # before reaching the app) -- wsproto doesn't share that history.
+    uvicorn.run(create_app(), host=config.web_host, port=config.web_port,
+                ws="wsproto")

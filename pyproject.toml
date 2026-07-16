@@ -34,7 +34,7 @@ commands = [
     "googlesearch-python>=1.2.3",
     "pywhatkit>=5.4",
 ]
-web = ["fastapi>=0.110", "uvicorn>=0.29", "websockets>=12.0"]
+web = ["fastapi>=0.110", "uvicorn>=0.29", "wsproto>=1.2.0"]
 spotify = ["spotipy>=2.23"]
 mcp = ["mcp>=1.0.0"]
 # Windows system controls
